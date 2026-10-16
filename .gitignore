@@ -1,0 +1,17 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Test cache
+.pytest_cache/
+
+# Local database (created automatically when the app runs)
+items.db
+
+# Editor / OS files
+.vscode/
+.DS_Store
+Thumbs.db
