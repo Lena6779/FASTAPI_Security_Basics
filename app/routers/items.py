@@ -6,14 +6,19 @@ Security features:
   name and description before saving, which prevents stored XSS.
 - SQL injection prevention: every query uses ? placeholders so user input
   is always treated as data, never as SQL. See list_items for an example.
+- Rate limiting: GET /items allows 60 requests per minute per IP, and
+  POST /items allows 20.
+- Input limits: Pydantic rejects text and numbers outside the allowed bounds.
 """
 
 import re
 import sqlite3
 from typing import Optional
 
-from fastapi import APIRouter, status
-from pydantic import BaseModel, ValidationInfo, field_validator
+from fastapi import APIRouter, Query, Request, Response, status
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
+
+from app.limiter import CREATE_LIMIT, LIST_LIMIT, limiter
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -59,8 +64,8 @@ TAG_RE = re.compile(r"<[^>]*>")
 
 
 class ItemCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=1000)
 
     @field_validator("name", "description")
     @classmethod
@@ -85,7 +90,14 @@ class Item(BaseModel):
     
 
 @router.get("", response_model=list[Item])
-def list_items(search: Optional[str] = None):
+@limiter.limit(LIST_LIMIT)
+def list_items(
+    request: Request,
+    response: Response,
+    search: Optional[str] = Query(None, min_length=1, max_length=100),
+    limit: int = Query(100, ge=1, le=100),
+    offset: int = Query(0, ge=0, le=1_000_000),
+):
     """
     List items, optionally filtered by a name search.
 
@@ -115,11 +127,15 @@ def list_items(search: Optional[str] = None):
     try:
         if search:
             rows = conn.execute(
-                "SELECT id, name, description FROM items WHERE name LIKE ?",
-                (f"%{search}%",),
+                "SELECT id, name, description FROM items "
+                "WHERE name LIKE ? LIMIT ? OFFSET ?",
+                (f"%{search}%", limit, offset),
             ).fetchall()
         else:
-            rows = conn.execute("SELECT id, name, description FROM items").fetchall()
+            rows = conn.execute(
+                "SELECT id, name, description FROM items LIMIT ? OFFSET ?",
+                (limit, offset),
+            ).fetchall()
     finally:
         conn.close()
 
@@ -127,7 +143,8 @@ def list_items(search: Optional[str] = None):
 
 
 @router.post("", response_model=Item, status_code=status.HTTP_201_CREATED)
-def create_item(item: ItemCreate):
+@limiter.limit(CREATE_LIMIT)
+def create_item(request: Request, response: Response, item: ItemCreate):
     # By the time we get here, item.name and item.description are already sanitized
     conn = get_connection()
     try:
@@ -140,4 +157,4 @@ def create_item(item: ItemCreate):
     finally:
         conn.close()
 
-    return {"id": new_id, "name": item.name, "description": item.description}
+    return {"id": new_id, "name": item.name, "description": item.description}

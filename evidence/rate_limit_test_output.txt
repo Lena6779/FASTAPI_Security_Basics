@@ -1,0 +1,52 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.1.1, pluggy-1.7.0 -- C:\Users\hersl\dev\FASTAPI_Security_Basics\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\hersl\dev\FASTAPI_Security_Basics
+plugins: anyio-4.15.1
+collecting ... collected 26 items
+
+tests/test_security.py::test_valid_login_succeeds PASSED
+tests/test_security.py::test_wrong_password_returns_401 PASSED
+tests/test_security.py::test_non_ascii_login_returns_401_not_a_server_error PASSED
+tests/test_security.py::test_sixth_rapid_login_returns_429 Login attempt 1: 401
+Login attempt 2: 401
+Login attempt 3: 401
+Login attempt 4: 401
+Login attempt 5: 401
+Login attempt 6: 429
+PASSED
+tests/test_security.py::test_21st_rapid_create_returns_429 Create attempt 21: 429
+PASSED
+tests/test_security.py::test_61st_rapid_list_returns_429 List attempt 61: 429
+PASSED
+tests/test_security.py::test_login_rejects_out_of_bounds_input[payload0] PASSED
+tests/test_security.py::test_login_rejects_out_of_bounds_input[payload1] PASSED
+tests/test_security.py::test_login_rejects_out_of_bounds_input[payload2] PASSED
+tests/test_security.py::test_login_rejects_out_of_bounds_input[payload3] PASSED
+tests/test_security.py::test_create_item_rejects_out_of_bounds_input[payload0] PASSED
+tests/test_security.py::test_create_item_rejects_out_of_bounds_input[payload1] PASSED
+tests/test_security.py::test_create_item_rejects_out_of_bounds_input[payload2] PASSED
+tests/test_security.py::test_create_item_accepts_values_at_the_maximum PASSED
+tests/test_security.py::test_list_items_rejects_out_of_bounds_query[limit=0] PASSED
+tests/test_security.py::test_list_items_rejects_out_of_bounds_query[limit=101] PASSED
+tests/test_security.py::test_list_items_rejects_out_of_bounds_query[offset=-1] PASSED
+tests/test_security.py::test_list_items_rejects_out_of_bounds_query[offset=1000001] PASSED
+tests/test_security.py::test_list_items_rejects_out_of_bounds_query[search=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] PASSED
+tests/test_security.py::test_limit_and_offset_page_through_results PASSED
+tests/test_security.py::test_script_tags_are_stripped PASSED
+tests/test_security.py::test_name_that_is_only_html_is_rejected PASSED
+tests/test_security.py::test_sql_injection_search_is_treated_as_text PASSED
+tests/test_security.py::test_cors_allows_approved_origins[http://localhost:8501] PASSED
+tests/test_security.py::test_cors_allows_approved_origins[http://localhost:3000] PASSED
+tests/test_security.py::test_cors_blocks_other_origins PASSED
+
+============================== warnings summary ===============================
+venv\Lib\site-packages\slowapi\extension.py:720
+venv\Lib\site-packages\slowapi\extension.py:720
+venv\Lib\site-packages\slowapi\extension.py:720
+venv\Lib\site-packages\slowapi\extension.py:720
+  C:\Users\hersl\dev\FASTAPI_Security_Basics\venv\Lib\site-packages\slowapi\extension.py:720: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 26 passed, 4 warnings in 3.00s ========================
